@@ -1,0 +1,47 @@
+{
+  "id": "patient_001",
+  "name": "Alex Rivera",
+  "dob": "1985-04-12",
+  "conditions": ["Type 2 Diabetes", "Hypertension"],
+  "medications": ["Metformin 500mg", "Lisinopril 10mg"],
+  "insurance": {
+    "provider": "BlueCross",
+    "plan": "PPO Gold",
+    "memberId": "BCX-2024-88471",
+    "deductible": 1500,
+    "deductibleMet": 800,
+    "copay": { "primary": 20, "specialist": 50 }
+  },
+  "primaryCare": "Dr. Sarah Chen",
+  "clinic": "City Medical Group",
+  "lastVisit": "2026-01-15",
+  "upcomingAppointments": [],
+  "availableSlots": [
+    { "date": "2026-04-03", "time": "09:00 AM", "doctor": "Dr. Sarah Chen", "specialty": "Primary Care", "location": "City Medical Group - Room 204" },
+    { "date": "2026-04-03", "time": "02:30 PM", "doctor": "Dr. James Wong", "specialty": "Orthopedics", "location": "City Medical Group - Room 115" },
+    { "date": "2026-04-04", "time": "10:00 AM", "doctor": "Dr. James Wong", "specialty": "Orthopedics", "location": "City Medical Group - Room 115" },
+    { "date": "2026-04-04", "time": "03:00 PM", "doctor": "Dr. Maria Santos", "specialty": "Endocrinology", "location": "City Medical Group - Room 301" },
+    { "date": "2026-04-07", "time": "11:00 AM", "doctor": "Dr. Sarah Chen", "specialty": "Primary Care", "location": "City Medical Group - Room 204" }
+  ],
+  "ehrRecords": {
+    "recentVisits": [
+      {
+        "date": "2026-01-15",
+        "doctor": "Dr. Sarah Chen",
+        "reason": "Diabetes follow-up",
+        "notes": "HbA1c improved to 6.8%. Continue current medication. Schedule 3-month follow-up.",
+        "vitals": { "bp": "128/82", "weight": "178 lbs", "glucose": "112 mg/dL" }
+      },
+      {
+        "date": "2025-10-20",
+        "doctor": "Dr. Sarah Chen",
+        "reason": "Annual physical",
+        "notes": "Overall health stable. Blood pressure slightly elevated. Added Lisinopril 10mg.",
+        "vitals": { "bp": "142/90", "weight": "180 lbs", "glucose": "118 mg/dL" }
+      }
+    ],
+    "allergies": ["Penicillin", "Sulfa drugs"],
+    "bloodType": "A+",
+    "emergencyContact": { "name": "Jordan Rivera", "relation": "Spouse", "phone": "555-0192" }
+  }
+}

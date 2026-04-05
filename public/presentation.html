@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MediCheck — Hackathon Presentation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── App design tokens ── */
+    :root {
+      --teal:       #0d9488;
+      --teal-d:     #0f766e;
+      --teal-light: #f0fdfa;
+      --teal-ring:  #99f6e4;
+      --teal-text:  #0f766e;
+      --teal-50:    #f0fdfa;
+      --teal-100:   #ccfbf1;
+      --teal-200:   #99f6e4;
+      --teal-700:   #0f766e;
+
+      --slate:      #0f172a;
+      --body:       #475569;
+      --muted:      #64748b;
+      --faint:      #94a3b8;
+
+      --bg:         #ffffff;
+      --bg-alt:     #f8fafc;
+      --bg-section: #f1f5f9;
+
+      --border:     #e2e8f0;
+      --border-2:   #cbd5e1;
+
+      --shadow-sm:  0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+      --shadow-md:  0 4px 12px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.05);
+      --shadow-teal: 0 4px 20px rgba(13,148,136,.2);
+    }
+
+    html, body { width: 100%; height: 100%; overflow: hidden; font-family: Inter, system-ui, sans-serif; background: var(--bg-alt); color: var(--slate); }
+
+    /* ── Slide deck ── */
+    #deck { width: 100%; height: 100%; position: relative; }
+
+    .slide {
+      position: absolute; inset: 0;
+      background: var(--bg);
+      display: flex; flex-direction: column;
+      opacity: 0; pointer-events: none;
+      transition: opacity .35s ease;
+      overflow: hidden;
+    }
+    .slide.active { opacity: 1; pointer-events: auto; }
+
+    /* ── Navigation bar ── */
+    #nav {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      display: flex; align-items: center; gap: 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 8px 18px;
+      box-shadow: var(--shadow-md);
+      z-index: 200;
+    }
+    #nav button {
+      cursor: pointer; border: none; background: none;
+      color: var(--muted); font-size: 16px; padding: 2px 6px;
+      transition: color .15s; line-height: 1;
+    }
+    #nav button:hover { color: var(--teal); }
+    #nav button:disabled { color: var(--border-2); cursor: default; }
+    #slide-counter { font-size: 11px; color: var(--muted); min-width: 40px; text-align: center; font-variant-numeric: tabular-nums; }
+    .dot-row { display: flex; gap: 5px; align-items: center; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border-2); cursor: pointer; transition: background .2s, transform .2s; }
+    .dot.active { background: var(--teal); transform: scale(1.4); }
+
+    #hint { position: fixed; bottom: 24px; right: 24px; font-size: 11px; color: var(--faint); }
+
+    /* ── Progress bar ── */
+    #progress { position: fixed; top: 0; left: 0; height: 2px; background: linear-gradient(90deg,var(--teal),var(--teal-ring)); transition: width .35s; z-index: 300; }
+
+    /* ── Slide top bar (consistent header) ── */
+    .slide-top {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 48px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      flex-shrink: 0;
+    }
+    .slide-logo { display: flex; align-items: center; gap: 10px; }
+    .slide-logo .mark {
+      width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--teal), var(--teal-d));
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: var(--shadow-teal);
+    }
+    .slide-logo span { font-size: 14px; font-weight: 700; color: var(--slate); }
+    .slide-num { font-size: 11px; color: var(--faint); font-variant-numeric: tabular-nums; }
+    .slide-badge { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; background: var(--teal-50); color: var(--teal-text); border: 1px solid var(--teal-200); border-radius: 999px; padding: 3px 10px; }
+
+    /* ── Layout helpers ── */
+    .slide-body { flex: 1; display: flex; flex-direction: column; padding: 36px 48px 60px; overflow: hidden; }
+    .slide-body.center { align-items: center; justify-content: center; text-align: center; padding: 36px 80px 60px; }
+    .slide-body.split { padding: 0; flex-direction: row; }
+    .split-left, .split-right { flex: 1; padding: 36px 40px 60px; display: flex; flex-direction: column; justify-content: center; }
+    .split-left { border-right: 1px solid var(--border); background: var(--bg-alt); }
+
+    /* ── Typography ── */
+    .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--teal); margin-bottom: 10px; }
+    .hero-title { font-size: clamp(36px,4.5vw,64px); font-weight: 900; line-height: 1.05; letter-spacing: -.025em; color: var(--slate); }
+    .section-title { font-size: clamp(24px,3vw,40px); font-weight: 800; line-height: 1.1; letter-spacing: -.02em; color: var(--slate); }
+    .subtitle { font-size: clamp(13px,1.4vw,16px); line-height: 1.65; color: var(--body); margin-top: 14px; max-width: 560px; }
+    .accent { color: var(--teal); }
+
+    /* ── Cards ── */
+    .card-grid { display: grid; gap: 14px; margin-top: 20px; }
+    .g2 { grid-template-columns: 1fr 1fr; }
+    .g3 { grid-template-columns: 1fr 1fr 1fr; }
+
+    .card {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 14px; padding: 20px;
+      display: flex; flex-direction: column; gap: 8px;
+      box-shadow: var(--shadow-sm);
+    }
+    .card.tinted { background: var(--teal-50); border-color: var(--teal-100); }
+    .card.muted  { background: var(--bg-alt); }
+    .card-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .card h3 { font-size: 14px; font-weight: 700; color: var(--slate); }
+    .card p  { font-size: 12px; color: var(--body); line-height: 1.55; }
+
+    /* ── Pills / badges ── */
+    .pill { display: inline-flex; align-items: center; gap: 5px; border-radius: 999px; padding: 4px 12px; font-size: 11px; font-weight: 600; }
+    .pill-teal  { background: var(--teal-50); color: var(--teal-text); border: 1px solid var(--teal-200); }
+    .pill-gray  { background: var(--bg-alt); color: var(--muted); border: 1px solid var(--border); }
+    .pill-write { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+    .pill-danger{ background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+    .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+
+    /* ── Stat boxes ── */
+    .stat-row { display: flex; gap: 24px; justify-content: center; margin-top: 28px; }
+    .stat-box { text-align: center; }
+    .stat-box .val { font-size: clamp(28px,3.5vw,48px); font-weight: 900; color: var(--teal); line-height: 1; }
+    .stat-box .lbl { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+    /* ── Step list ── */
+    .steps { display: flex; flex-direction: column; gap: 18px; }
+    .step  { display: flex; align-items: flex-start; gap: 14px; }
+    .step-num {
+      flex-shrink: 0; width: 32px; height: 32px; border-radius: 9px;
+      background: linear-gradient(135deg, var(--teal), var(--teal-d));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 800; color: #fff;
+    }
+    .step-body h4 { font-size: 13px; font-weight: 700; color: var(--slate); }
+    .step-body p  { font-size: 12px; color: var(--body); margin-top: 2px; line-height: 1.5; }
+
+    /* ── Code block ── */
+    .code-block {
+      background: #f8fafc; border: 1px solid var(--border);
+      border-radius: 12px; padding: 18px 22px;
+      font-family: 'JetBrains Mono','Fira Code','Cascadia Code',monospace;
+      font-size: 11.5px; line-height: 1.75; overflow: hidden;
+    }
+    .code-block .cm { color: #94a3b8; font-style: italic; }
+    .code-block .kw { color: #7c3aed; }
+    .code-block .fn { color: #0f766e; font-weight: 600; }
+    .code-block .str{ color: #0369a1; }
+    .code-block .ind{ padding-left: 18px; display: block; }
+    .code-block .ind2{ padding-left: 36px; display: block; }
+
+    /* ── Flow diagram ── */
+    .flow { display: flex; align-items: center; justify-content: center; gap: 0; flex-wrap: nowrap; }
+    .flow-box {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 12px;
+      padding: 12px 16px; text-align: center; min-width: 96px;
+      box-shadow: var(--shadow-sm);
+    }
+    .flow-box .fb-icon { font-size: 22px; margin-bottom: 5px; }
+    .flow-box .fb-label { font-size: 10px; font-weight: 600; color: var(--muted); line-height: 1.3; }
+    .flow-box.active { border-color: var(--teal-200); background: var(--teal-50); }
+    .flow-box.active .fb-label { color: var(--teal-text); }
+    .flow-arrow { color: var(--border-2); font-size: 18px; padding: 0 4px; flex-shrink: 0; }
+
+    /* ── Chat mockup ── */
+    .mockup { background: var(--bg); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow-md); }
+    .mockup-bar { background: var(--bg-alt); border-bottom: 1px solid var(--border); padding: 10px 14px; display: flex; align-items: center; gap: 7px; }
+    .mockup-dot { width: 9px; height: 9px; border-radius: 50%; }
+    .mockup-body { padding: 16px; }
+    .chat-msg { border-radius: 12px; padding: 9px 13px; margin-bottom: 8px; font-size: 12px; line-height: 1.55; max-width: 88%; }
+    .chat-user { background: var(--teal); color: #fff; margin-left: auto; border-radius: 12px 12px 2px 12px; }
+    .chat-agent { background: var(--bg-alt); color: var(--slate); border: 1px solid var(--border); border-radius: 12px 12px 12px 2px; }
+    .tool-pill-chat { display: inline-flex; align-items: center; gap: 5px; background: var(--teal-50); border: 1px solid var(--teal-100); border-radius: 999px; padding: 3px 9px; font-size: 10px; color: var(--teal-text); margin-bottom: 6px; font-weight: 600; }
+
+    /* ── Comparison table ── */
+    table.compare { width: 100%; border-collapse: collapse; font-size: 12px; }
+    table.compare th { padding: 9px 12px; text-align: left; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); border-bottom: 2px solid var(--border); background: var(--bg-alt); }
+    table.compare td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--body); vertical-align: middle; }
+    table.compare tr:last-child td { border-bottom: none; }
+    table.compare .check { color: var(--teal); font-weight: 700; }
+    table.compare .cross { color: #ef4444; }
+    table.compare .row-hl td { background: var(--teal-50); }
+    table.compare .row-hl td:first-child { color: var(--teal-text); font-weight: 700; }
+
+    /* ── Hero slide specific ── */
+    #s1 { background: var(--bg); }
+    #s1 .grid-bg {
+      position: absolute; inset: 0; pointer-events: none;
+      background-image: linear-gradient(var(--border) 1px,transparent 1px), linear-gradient(90deg,var(--border) 1px,transparent 1px);
+      background-size: 48px 48px; opacity: .5;
+    }
+    #s1 .glow {
+      position: absolute; left: 50%; top: -80px; transform: translateX(-50%);
+      width: 640px; height: 480px; pointer-events: none;
+      background: radial-gradient(ellipse, rgba(13,148,136,.07) 0%, transparent 68%);
+    }
+    #s1 .hero-content { position: relative; z-index: 1; }
+
+    /* ── Closing slide ── */
+    #s10 { background: linear-gradient(135deg, var(--teal), var(--teal-d)); }
+    #s10 .slide-top { background: rgba(0,0,0,.12); border-color: rgba(255,255,255,.15); }
+    #s10 .slide-logo span { color: #fff; }
+    #s10 .slide-badge { background: rgba(255,255,255,.15); color: #fff; border-color: rgba(255,255,255,.25); }
+    #s10 .slide-num { color: rgba(255,255,255,.4); }
+    #s10 .slide-body { color: #fff; }
+    #s10 .hero-title { color: #fff; }
+    #s10 .subtitle { color: rgba(255,255,255,.75); }
+    #s10 .pill-white { background: rgba(255,255,255,.15); color: #fff; border: 1px solid rgba(255,255,255,.25); }
+    #s10 .stat-box .val { color: var(--teal-ring); }
+    #s10 .stat-box .lbl { color: rgba(255,255,255,.6); }
+    #s10 .note { color: rgba(255,255,255,.4); font-size: 12px; margin-top: 36px; }
+  </style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<div id="deck">
+
+  <!-- ══ S1 HERO ══ -->
+  <section class="slide" id="s1">
+    <div class="grid-bg"></div>
+    <div class="glow"></div>
+
+    <!-- No top bar on hero — full canvas -->
+    <div class="slide-body center hero-content" style="padding:40px 80px 80px;gap:0">
+
+      <!-- Logo -->
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:28px">
+        <img src="./medicheck-mark.svg" width="68" height="68" alt="MediCheck" style="display:block;box-shadow:0 4px 20px rgba(0,150,137,.3)"/>
+        <span style="font-size:46px;font-weight:900;color:var(--slate);letter-spacing:-.03em">MediCheck</span>
+      </div>
+
+      <div class="pill pill-teal" style="margin-bottom:22px">
+        <span class="pulse"></span>
+        Auth0 "Authorized to Act" Hackathon
+      </div>
+
+      <h1 class="hero-title">
+        Your AI healthcare <span class="accent">navigator</span>
+      </h1>
+
+      <p class="subtitle" style="text-align:center;margin-left:auto;margin-right:auto">
+        Navigate the healthcare system by conversation — book appointments, verify insurance,
+        manage prescriptions — all secured by <strong style="color:var(--slate)">Auth0 Token Vault</strong>.
+      </p>
+
+      <div class="stat-row">
+        <div class="stat-box"><div class="val">5</div><div class="lbl">Health services</div></div>
+        <div class="stat-box"><div class="val">7</div><div class="lbl">Agent tools</div></div>
+        <div class="stat-box"><div class="val">0</div><div class="lbl">Credentials in app</div></div>
+        <div class="stat-box"><div class="val">100%</div><div class="lbl">User-controlled</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ S2 PROBLEM ══ -->
+  <section class="slide" id="s2">
+    <div class="slide-top">
+      <div class="slide-logo">
+        <div class="mark" style="background:none;box-shadow:none;padding:0;overflow:hidden"><img src="./medicheck-mark.svg" width="28" height="28" alt="MediCheck" style="display:block"/></div>
+        <span>MediCheck</span>
+      </div>
+      <span class="slide-badge">Problem</span>
+      <span class="slide-num">2 / 10</span>
+    </div>
+    <div class="slide-body">
+      <p class="eyebrow">The Problem</p>
+      <h2 class="section-title">Healthcare navigation is <span class="accent">broken</span></h2>
+
+      <div class="card-grid g3">
+        <div class="card">
+          <div class="card-icon" style="background:#fef2f2">😤</div>
+          <h3>Fragmented systems</h3>
+          <p>EHR, insurance, pharmacy, and scheduling live in separate portals — all with separate logins and zero coordination.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:#fffbeb">⏳</div>
+          <h3>Time-consuming</h3>
+          <p>Average patient spends 2+ hours a year on hold verifying coverage and booking appointments — before any care happens.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:#fef2f2">🔓</div>
+          <h3>Credential risks</h3>
+          <p>Existing AI tools ask for passwords directly — storing credentials in prompts, databases, or environment variables.</p>
+        </div>
+      </div>
+
+      <div class="card tinted" style="margin-top:14px">
+        <p style="font-size:14px;font-weight:600;color:var(--teal-text);line-height:1.65">
+          💡 <strong style="color:var(--slate)">Our answer:</strong>&nbsp;
+          A conversational AI agent that navigates all these systems on your behalf — with each service
+          protected by its own isolated, revocable token via Auth0 Token Vault.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ S3 SOLUTION ══ -->
+  <section class="slide" id="s3">
+    <div class="slide-top">
+      <div class="slide-logo"><div class="mark" style="background:none;box-shadow:none;padding:0;overflow:hidden"><img src="./medicheck-mark.svg" width="28" height="28" alt="MediCheck" style="display:block"/></div><span>MediCheck</span></div>
+      <span class="slide-badge">Solution</span>
+      <span class="slide-num">3 / 10</span>
+    </div>
+    <div class="slide-body" style="flex-direction:row;gap:24px;padding-top:28px">
+      <!-- Chat demo -->
+      <div style="flex:1.1;display:flex;flex-direction:column;gap:14px">
+        <div>
+          <p class="eyebrow">Solution</p>
+          <h2 class="section-title">One conversation.<br/>All your healthcare.</h2>
+        </div>
+        <div class="mockup" style="flex:1">
+          <div class="mockup-bar">
+            <div class="mockup-dot" style="background:#ef4444"></div>
+            <div class="mockup-dot" style="background:#f59e0b"></div>
+            <div class="mockup-dot" style="background:#22c55e"></div>
+            <span style="margin-left:8px;font-size:11px;color:var(--muted)">MediCheck Chat</span>
+          </div>
+          <div class="mockup-body">
+            <div class="chat-msg chat-user">I've been having knee pain. Can I see a specialist?</div>
+            <div style="margin-bottom:6px">
+              <span class="tool-pill-chat">🛡 Insurance · checking coverage…</span><br/>
+              <span class="tool-pill-chat">📅 Calendar · finding orthopedics slots…</span>
+            </div>
+            <div class="chat-msg chat-agent">
+              Your BlueCross PPO covers orthopedic visits at <strong>80% with a $50 copay</strong>. No referral needed.<br/><br/>
+              Dr. James Wong has availability <strong>tomorrow at 2:30 PM</strong>. Want me to book it?
+            </div>
+            <div class="chat-msg chat-user">Yes please.</div>
+            <div style="margin-bottom:6px"><span class="tool-pill-chat">✓ Booked · confirmation sent</span></div>
+            <div class="chat-msg chat-agent">Done! Appointment confirmed Apr 4 at 2:30 PM. Confirmation email sent.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature cards -->
+      <div style="flex:.85;display:flex;flex-direction:column;gap:12px;justify-content:center">
+        <div class="card tinted">
+          <div style="display:flex;align-items:center;gap:10px"><div class="card-icon" style="background:var(--teal-100)">🏥</div><div><h3>Medical History</h3><p>Reads EHR for context-aware recommendations.</p></div></div>
+        </div>
+        <div class="card tinted">
+          <div style="display:flex;align-items:center;gap:10px"><div class="card-icon" style="background:var(--teal-100)">🛡️</div><div><h3>Insurance Check</h3><p>Verifies coverage, copay & referral before you book.</p></div></div>
+        </div>
+        <div class="card tinted">
+          <div style="display:flex;align-items:center;gap:10px"><div class="card-icon" style="background:var(--teal-100)">📅</div><div><h3>Appointment Booking</h3><p>Finds slots and books — confirmed in seconds.</p></div></div>
+        </div>
+        <div class="card tinted">
+          <div style="display:flex;align-items:center;gap:10px"><div class="card-icon" style="background:var(--teal-100)">💊</div><div><h3>Medications</h3><p>Reviews prescriptions and drug info from OpenFDA.</p></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ S4 TOKEN VAULT ══ -->
+  <section class="slide" id="s4">
+    <div class="slide-top">
+      <div class="slide-logo"><div class="mark" style="background:none;box-shadow:none;padding:0;overflow:hidden"><img src="./medicheck-mark.svg" width="28" height="28" alt="MediCheck" style="display:block"/></div><span>MediCheck</span></div>
+      <span class="slide-badge">Security</span>
+      <span class="slide-num">4 / 10</span>
+    </div>
+    <div class="slide-body">
+      <p class="eyebrow">Security Model</p>
+      <h2 class="section-title">Auth0 Token Vault —<br/><span class="accent">zero credentials in the app</span></h2>
+
+      <!-- Flow -->
+      <div class="flow" style="margin:24px 0;gap:6px">
+        <div class="flow-box">
+          <div class="fb-icon">👤</div>
+          <div class="fb-label">Patient</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box active">
+          <div class="fb-icon">🔐</div>
+          <div class="fb-label">Auth0 Login</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box active">
+          <div class="fb-icon">🔑</div>
+          <div class="fb-label">Token Vault<br/><span style="font-size:9px;color:var(--teal)">app_metadata</span></div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box">
+          <div class="fb-icon">🤖</div>
+          <div class="fb-label">AI Agent</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box">
+          <div class="fb-icon">🏥</div>
+          <div class="fb-label">EHR / Insurance<br/>/ Pharmacy</div>
+        </div>
+      </div>
+
+      <div class="card-grid g3">
+        <div class="card">
+          <div class="card-icon" style="background:var(--teal-50)">🔑</div>
+          <h3>Per-Service Tokens</h3>
+          <p>EHR, insurance, calendar and pharmacy each get their own isolated token. A breach of one never exposes the others.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:var(--teal-50)">⚡</div>
+          <h3>Runtime Fetch Only</h3>
+          <p>Tokens are fetched from Auth0 <strong>at tool execution time</strong> — never stored in the app database or client session.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:var(--teal-50)">🚫</div>
+          <h3>Instant Revocation</h3>
+          <p>One click removes a token from the vault. The agent loses access immediately — no re-deployment required.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ S5 ARCHITECTURE ══ -->
+  <section class="slide" id="s5">
+    <div class="slide-top">
+      <div class="slide-logo"><div class="mark" style="background:none;box-shadow:none;padding:0;overflow:hidden"><img src="./medicheck-mark.svg" width="28" height="28" alt="MediCheck" style="display:block"/></div><span>MediCheck</span></div>
+      <span class="slide-badge">Architecture</span>
+      <span class="slide-num">5 / 10</span>
+    </div>
+    <div class="slide-body" style="flex-direction:row;gap:28px;padding-top:28px">
+      <!-- Steps -->
+      <div style="flex:.85;display:flex;flex-direction:column;gap:16px;justify-content:center">
+        <div>
+          <p class="eyebrow">How it works</p>
+          <h2 class="section-title" style="font-size:clamp(20px,2.4vw,30px)">Request to response</h2>
+        </div>
+        <div class="steps" style="margin-top:4px">
+          <div class="step"><div class="step-num">01</div><div class="step-body"><h4>Patient sends a message</h4><p>Chat request streams via Next.js API route using Vercel AI SDK v6.</p></div></div>
+          <div class="step"><div class="step-num">02</div><div class="step-body"><h4>GPT-4o selects tools</h4><p>LLM reasons over 7 agent tools and decides which health services to call.</p></div></div>
+          <div class="step"><div class="step-num">03</div><div class="step-body"><h4>Token Vault check</h4><p>Each tool fetches its token from Auth0 app_metadata at runtime. No token → graceful NOT_AUTHORIZED error.</p></div></div>
+          <div class="step"><div class="step-num">04</div><div class="step-body"><h4>Service call</h4><p>Bearer token sent to health service. Structured result streamed back to patient.</p></div></div>
+          <div class="step"><div class="step-num">05</div><div class="step-body"><h4>Audit logged</h4><p>Every token usage appears live in the sidebar audit log — full transparency.</p></div></div>
+        </div>
+      </div>
+
+      <!-- Code -->
+      <div style="flex:1.1;display:flex;align-items:center">
+        <div class="code-block" style="width:100%">
+          <div><span class="cm">// agent-tools.ts — getAvailableAppointments</span></div>
+          <div style="margin-top:10px"><span class="fn">execute</span>: <span class="kw">async</span> () =&gt; {</div>
+          <span class="ind"><span class="cm">// 1. Fetch token from Auth0 Token Vault</span></span>
+          <span class="ind"><span class="kw">const</span> token = <span class="kw">await</span> <span class="fn">getServiceToken</span>(</span>
+          <span class="ind2">userId, <span class="str">'calendar'</span></span>
+          <span class="ind">);</span>
+          <div style="margin-top:6px"></div>
+          <span class="ind"><span class="cm">// 2. Guard — graceful, never a crash</span></span>
+          <span class="ind"><span class="kw">if</span> (!token) <span class="kw">return</span> <span class="fn">notAuthorized</span>(</span>
+          <span class="ind2"><span class="str">'Calendar'</span>, <span class="str">'calendar'</span></span>
+          <span class="ind">);</span>
+          <div style="margin-top:6px"></div>
+          <span class="ind"><span class="cm">// 3. Call service with bearer token</span></span>
+          <span class="ind"><span class="kw">return</span> <span class="fn">getSlots</span>(token);</span>
+          <div>};</div>
+          <div style="margin-top:14px"><span class="cm">// token-vault.ts — reads Auth0 app_metadata</span></div>
+          <div style="margin-top:8px"><span class="kw">export async function</span> <span class="fn">getServiceToken</span>(</div>
+          <span class="ind">userId: <span class="str">string</span>, serviceId: <span class="str">ServiceId</span></span>
+          <div>): Promise&lt;string | <span class="kw">null</span>&gt; {</div>
+          <span class="ind"><span class="kw">const</span> meta = <span class="kw">await</span> <span class="fn">getUserMetadata</span>(userId);</span>
+          <span class="ind"><span class="kw">const</span> vault = meta.token_vault ?? {};</span>
+          <span class="ind"><span class="kw">return</span> vault[serviceId]?.token ?? <span class="kw">null</span>;</span>
+          <div>}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ S6 SERVICES ══ -->
+  <section class="slide" id="s6">
+    <div class="slide-top">
+      <div class="slide-logo"><div class="mark" style="background:none;box-shadow:none;padding:0;overflow:hidden"><img src="./medicheck-mark.svg" width="28" height="28" alt="MediCheck" style="display:block"/></div><span>MediCheck</span></div>
+      <span class="slide-badge">Services &amp; Tools</span>
+      <span class="slide-num">6 / 10</span>
+    </div>
+    <div class="slide-body">
+      <p class="eyebrow">7 agent tools · 5 services</p>
+      <h2 class="section-title" style="margin-bottom:20px">Everything the agent can do</h2>
+
+      <table class="compare">
+        <thead>
+          <tr>
+            <th>Service</th>
+            <th>Tool</th>
+            <th>Scope</th>
+            <th>Auth0 Token Vault</th>
+            <th>External API</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="row-hl">
+            <td>EHR Records</td>
+            <td><code style="font-size:11px;background:var(--bg-alt);padding:2px 6px;border-radius:4px;border:1px solid var(--border)">getPatientHistory</code></td>
+            <td><span class="pill pill-teal" style="font-size:10px;padding:2px 8px">read</span></td>
+            <td class="check">✓</td>
+            <td>Mock EHR API</td>
+          </tr>
+          <tr>
+            <td>Insurance</td>
+            <td><code style="font-size:11px;background:var(--bg-alt);padding:2px 6px;border-radius:4px;border:1px solid var(--border)">checkInsuranceCoverage</code></td>
+            <td><span class="pill pill-teal" style="font-size:10px;padding:2px 8px">read</span></td>
+            <td class="check">✓</td>
+            <td>Mock Insurance API</td>
+          </tr>
+          <tr class="row-hl">
+            <td rowspan="2">Calendar</td>
+            <td><code style="font-size:11px;background:var(--bg-alt);padding:2px 6px;border-radius:4px;border:1px solid var(--border)">getAvailableAppointments</code></td>
+            <td><span class="pill pill-teal" style="font-size:10px;padding:2px 8px">read</span></td>
+            <td class="check">✓</td>
+            <td>Mock Calendar API</td>
+          </tr>
+          <tr class="row-hl">
+            <td><code style="font-size:11px;background:var(--bg-alt);padding:2px 6px;border-radius:4px;border:1px solid var(--border)">bookAppointment</code></td>
+            <td><span class="pill pill-write" style="font-size:10px;padding:2px 8px">write</span></td>
+            <td class="check">✓</td>
+            <td>Mock Calendar API</td>
+          </tr>
+          <tr>
+            <td>Pharmacy</td>
+            <td><code style="font-size:11px;background:var(--bg-alt);padding:2px 6px;border-radius:4px;border:1px solid var(--border)">getCurrentMedications</code></td>
+            <td><span class="pill pill-teal" style="font-size:10px;padding:2px 8px">read</span></td>
+            <td class="check">✓</td>
+            <td>Mock Pharmacy API</td>
+          </tr>
+          <tr class="row-hl">
+            <td>FDA Database</td>
+            <td><code style="font-size:11px;background:var(--bg-alt);padding:2px 6px;border-radius:4px;border:1px solid var(--border)">lookupMedication</code></td>
+            <td><span class="pill pill-teal" style="font-size:10px;padding:2px 8px">read</span></td>
+            <td><span style="color:var(--muted)">—</span></td>
+            <td>OpenFDA (public)</td>
+          </tr>
+          <tr>
+            <td>Email</td>
+            <td><code style="font-size:11px;background:var(--bg-alt);padding:2px 6px;border-radius:4px;border:1px solid var(--border)">sendHealthReminder</code></td>
+            <td><span class="pill pill-write" style="font-size:10px;padding:2px 8px">write</span></td>
+            <td class="check">✓</td>
+            <td>Resend</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══ S7 RICH UI ══ -->
+  <section class="slide" id="s7">
+    <div class="slide-top">
+      <div class="slide-logo"><div class="mark" style="background:none;box-shadow:none;padding:0;overflow:hidden"><img src="./medicheck-mark.svg" width="28" height="28" alt="MediCheck" style="display:block"/></div><span>MediCheck</span></div>
+      <span class="slide-badge">Rich UI</span>
+      <span class="slide-num">7 / 10</span>
+    </div>
+    <div class="slide-body">
+      <p class="eyebrow">Structured data, not just text</p>
+      <h2 class="section-title" style="margin-bottom:20px">Inline charts &amp; cards per tool result</h2>
+
+      <div class="card-grid g3">
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+            <div class="card-icon" style="background:var(--teal-50)">🏥</div>
+            <h3>Patient History</h3>
+          </div>
+          <p>Vitals table · active conditions chips · allergy badges · visit history · emergency contact</p>
+        </div>
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+            <div class="card-icon" style="background:#eff6ff">🛡️</div>
+            <h3>Insurance Gauge</h3>
+          </div>
+          <p>Half-circle SVG coverage gauge · deductible progress bar · copay breakdown · referral alert</p>
+        </div>
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+            <div class="card-icon" style="background:#fdf4ff">📅</div>
+            <h3>Appointment Timeline</h3>
+          </div>
+          <p>Slots grouped by date · Today/Tomorrow labels · specialty color-coding · doctor + location</p>
+        </div>
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+            <div class="card-icon" style="background:#fff7ed">💊</div>
+            <h3>Medication List</h3>
+          </div>
+          <p>Refill progress bars with red/amber/green · low-refill warnings · dosage badges · next refill countdown</p>
+        </div>
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+            <div class="card-icon" style="background:#ecfdf5">🔬</div>
+            <h3>FDA Drug Detail</h3>
+          </div>
+          <p>Warnings · adverse reactions · drug interactions — color-coded sections from OpenFDA</p>
+        </div>
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+            <div class="card-icon" style="background:var(--teal-50)">✅</div>
+            <h3>Booking Confirmation</h3>
+          </div>
+          <p>Confirmation number · appointment detail card · email sent badge · add-to-calendar hint</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ S8 WHY VAULT ══ -->
+  <section class="slide" id="s8">
+    <div class="slide-top">
+      <div class="slide-logo"><div class="mark" style="background:none;box-shadow:none;padding:0;overflow:hidden"><img src="./medicheck-mark.svg" width="28" height="28" alt="MediCheck" style="display:block"/></div><span>MediCheck</span></div>
+      <span class="slide-badge">Why Token Vault?</span>
+      <span class="slide-num">8 / 10</span>
+    </div>
+    <div class="slide-body">
+      <p class="eyebrow">Comparison</p>
+      <h2 class="section-title" style="margin-bottom:20px">Auth0 Token Vault vs. alternatives</h2>
+
+      <table class="compare">
+        <thead>
+          <tr>
+            <th>Approach</th>
+            <th>Credentials in app</th>
+            <th>Per-service isolation</th>
+            <th>Instant revocation</th>
+            <th>Audit trail</th>
+            <th>User controls access</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="row-hl">
+            <td>Auth0 Token Vault <span class="pill pill-teal" style="font-size:9px;padding:1px 7px;margin-left:4px">MediCheck</span></td>
+            <td class="check">✓ Never</td>
+            <td class="check">✓</td>
+            <td class="check">✓ Real-time</td>
+            <td class="check">✓</td>
+            <td class="check">✓</td>
+          </tr>
+          <tr>
+            <td>Hardcoded env vars</td>
+            <td class="cross">✗ Yes</td>
+            <td class="cross">✗</td>
+            <td class="cross">✗ Redeploy</td>
+            <td class="cross">✗</td>
+            <td class="cross">✗</td>
+          </tr>
+          <tr>
+            <td>Database-stored tokens</td>
+            <td class="cross">✗ Yes</td>
+            <td class="cross">✗ Shared</td>
+            <td class="check">✓</td>
+            <td class="cross">✗</td>
+            <td class="cross">✗</td>
+          </tr>
+          <tr>
+            <td>Give AI your passwords</td>
+            <td class="cross">✗ In prompt</td>
+            <td class="cross">✗</td>
+            <td class="cross">✗</td>
+            <td class="cross">✗</td>
+            <td class="cross">✗</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="card tinted" style="margin-top:16px">
+        <p style="font-size:13px;color:var(--teal-text);line-height:1.65">
+          <strong style="color:var(--slate)">Key insight:</strong>&nbsp;
+          Auth0 Token Vault is the only approach that gives users granular control per service,
+          stores nothing in the app, and provides an instant revocation path — essential for healthcare data.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ S9 TECH STACK ══ -->
+  <section class="slide" id="s9">
+    <div class="slide-top">
+      <div class="slide-logo"><div class="mark" style="background:none;box-shadow:none;padding:0;overflow:hidden"><img src="./medicheck-mark.svg" width="28" height="28" alt="MediCheck" style="display:block"/></div><span>MediCheck</span></div>
+      <span class="slide-badge">Tech Stack</span>
+      <span class="slide-num">9 / 10</span>
+    </div>
+    <div class="slide-body">
+      <p class="eyebrow">Built with</p>
+      <h2 class="section-title" style="margin-bottom:20px">Modern, production-ready stack</h2>
+
+      <div class="card-grid g3">
+        <div class="card">
+          <div class="card-icon" style="background:#f0fdf4">🔐</div>
+          <h3>Auth0</h3>
+          <p><code style="font-size:10px;background:var(--bg-alt);padding:1px 5px;border-radius:4px">@auth0/nextjs-auth0 v4</code><br/>Authentication + Token Vault via <code style="font-size:10px">app_metadata</code> + M2M Management API</p>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:#fdf4ff">🤖</div>
+          <h3>Vercel AI SDK v6</h3>
+          <p><code style="font-size:10px;background:var(--bg-alt);padding:1px 5px;border-radius:4px">ai + @ai-sdk/openai</code><br/>streamText · tool() · DefaultChatTransport · stopWhen</p>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:#eff6ff">⚡</div>
+          <h3>Next.js 16</h3>
+          <p>App Router · Server Components · Streaming API routes · React 19 · Tailwind CSS v4</p>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:#fffbeb">🧠</div>
+          <h3>GPT-4o</h3>
+          <p>Multi-step agentic reasoning · up to 8 tool-call steps per conversation turn via <code style="font-size:10px">stepCountIs(8)</code></p>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:#ecfdf5">💊</div>
+          <h3>OpenFDA</h3>
+          <p>Public drug database API — no auth required. Drug information, warnings, interactions at zero cost.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:#fdf2f8">📧</div>
+          <h3>Resend</h3>
+          <p>Transactional email for appointment confirmations and health reminders via <code style="font-size:10px">resend v6</code></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ S10 CLOSING ══ -->
+  <section class="slide" id="s10">
+    <div class="slide-top">
+      <div class="slide-logo"><div class="mark" style="background:none;box-shadow:none;padding:0;overflow:hidden"><img src="./medicheck-mark.svg" width="28" height="28" alt="MediCheck" style="display:block"/></div><span>MediCheck</span></div>
+      <span class="slide-badge">Thank you</span>
+      <span class="slide-num">10 / 10</span>
+    </div>
+    <div class="slide-body center" style="gap:0">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px">
+        <div style="width:64px;height:64px;border-radius:16px;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center">
+          <svg width="36" height="36" viewBox="0 0 20 20" fill="none">
+            <rect x="8" y="2" width="4" height="16" rx="1.5" fill="white"/>
+            <rect x="2" y="8" width="16" height="4"  rx="1.5" fill="white"/>
+            <path d="M2 10L5.5 10L7 7L9.5 13L11.5 8L13 10L18 10" stroke="white" stroke-width="1.1" stroke-opacity=".5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span style="font-size:42px;font-weight:900;color:#fff;letter-spacing:-.025em">MediCheck</span>
+      </div>
+
+      <h2 class="hero-title" style="max-width:620px">
+        Healthcare navigation,<br/>secured by Auth0 Token Vault
+      </h2>
+
+      <p class="subtitle" style="text-align:center;margin:16px auto 0;max-width:500px">
+        Every service token isolated. Every action audited.<br/>Complete user control — connect, revoke, repeat.
+      </p>
+
+      <div style="display:flex;gap:10px;margin-top:32px;flex-wrap:wrap;justify-content:center">
+        <span class="pill pill-white">Next.js 16</span>
+        <span class="pill pill-white">Auth0 Token Vault</span>
+        <span class="pill pill-white">GPT-4o</span>
+        <span class="pill pill-white">Vercel AI SDK v6</span>
+        <span class="pill pill-white">OpenFDA</span>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-box"><div class="val">5</div><div class="lbl">Services connected</div></div>
+        <div class="stat-box"><div class="val">7</div><div class="lbl">Agent tools</div></div>
+        <div class="stat-box"><div class="val">0</div><div class="lbl">Stored credentials</div></div>
+      </div>
+
+      <p class="note">Built for the Auth0 "Authorized to Act" Hackathon · 2026</p>
+    </div>
+  </section>
+
+</div><!-- #deck -->
+
+<div id="nav">
+  <button id="btn-prev" onclick="go(-1)">←</button>
+  <div class="dot-row" id="dots"></div>
+  <span id="slide-counter">1 / 10</span>
+  <button id="btn-next" onclick="go(1)">→</button>
+</div>
+
+<div id="hint">← → to navigate</div>
+
+<script>
+  const slides  = document.querySelectorAll('.slide');
+  const total   = slides.length;
+  let cur = 0;
+
+  const dotsEl   = document.getElementById('dots');
+  const counter  = document.getElementById('slide-counter');
+  const progress = document.getElementById('progress');
+  const btnPrev  = document.getElementById('btn-prev');
+  const btnNext  = document.getElementById('btn-next');
+
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.onclick = () => goTo(i);
+    dotsEl.appendChild(d);
+  });
+
+  function goTo(n) {
+    slides[cur].classList.remove('active');
+    dotsEl.children[cur].classList.remove('active');
+    cur = Math.max(0, Math.min(total - 1, n));
+    slides[cur].classList.add('active');
+    dotsEl.children[cur].classList.add('active');
+    counter.textContent = `${cur + 1} / ${total}`;
+    progress.style.width = `${((cur + 1) / total) * 100}%`;
+    btnPrev.disabled = cur === 0;
+    btnNext.disabled = cur === total - 1;
+  }
+
+  function go(d) { goTo(cur + d); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   go(-1);
+  });
+
+  goTo(0);
+</script>
+</body>
+</html>

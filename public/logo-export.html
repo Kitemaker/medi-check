@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MediCheck — Logo Export</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Inter, system-ui, sans-serif; background: #0a0f14; color: #e2e8f0; min-height: 100vh; padding: 48px 24px; }
+    h1 { font-size: 22px; font-weight: 800; color: #f8fafc; margin-bottom: 4px; }
+    p.sub { font-size: 13px; color: #64748b; margin-bottom: 48px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; max-width: 1100px; }
+    .card { background: #111827; border: 1px solid #1f2937; border-radius: 16px; overflow: hidden; }
+    .card-label { padding: 14px 18px 10px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #64748b; border-bottom: 1px solid #1f2937; }
+    .card-preview { display: flex; align-items: center; justify-content: center; padding: 32px; }
+    .card-preview.dark  { background: #0a0f14; }
+    .card-preview.light { background: #f8fafc; }
+    .card-preview.teal  { background: linear-gradient(135deg,#0d9488,#0f766e); }
+    canvas { display: block; image-rendering: crisp-edges; }
+    .actions { display: flex; gap: 8px; padding: 12px 18px; border-top: 1px solid #1f2937; flex-wrap: wrap; align-items: center; }
+    button { cursor: pointer; border: none; border-radius: 8px; padding: 7px 14px; font-size: 12px; font-weight: 600; font-family: inherit; transition: opacity .15s; }
+    button:hover { opacity: .85; }
+    button.primary { background: #0d9488; color: #fff; }
+    .size-label { font-size: 11px; color: #475569; }
+  </style>
+</head>
+<body>
+<h1>MediCheck Logo Export</h1>
+<p class="sub">Click Download PNG on any variant to save it.</p>
+<div class="grid" id="grid"></div>
+<script>
+/**
+ * Shield + plus mark.
+ * Coordinates mapped from 20×20 viewBox: multiply each unit by (size/20).
+ */
+function drawMark(ctx, x, y, size) {
+  const s = size / 20;
+  ctx.globalAlpha = 1;
+
+  // Shield body
+  ctx.beginPath();
+  ctx.moveTo(x + 10*s, y + 2*s);
+  ctx.lineTo(x + 16*s, y + 5.5*s);
+  ctx.lineTo(x + 16*s, y + 12.5*s);
+  ctx.quadraticCurveTo(x + 16*s, y + 17*s, x + 10*s, y + 19*s);
+  ctx.quadraticCurveTo(x + 4*s,  y + 17*s, x + 4*s,  y + 12.5*s);
+  ctx.lineTo(x + 4*s, y + 5.5*s);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(255,255,255,0.20)';
+  ctx.fill();
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 1.25 * s;
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+
+  // Plus / cross
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 2.1 * s;
+  ctx.lineCap = 'round';
+
+  ctx.beginPath();                          // vertical bar
+  ctx.moveTo(x + 10*s,  y + 7.5*s);
+  ctx.lineTo(x + 10*s,  y + 14*s);
+  ctx.stroke();
+
+  ctx.beginPath();                          // horizontal bar
+  ctx.moveTo(x + 6.5*s, y + 10.75*s);
+  ctx.lineTo(x + 13.5*s, y + 10.75*s);
+  ctx.stroke();
+}
+
+function tealGrad(ctx, x, y, w, h) {
+  const g = ctx.createLinearGradient(x, y, x+w, y+h);
+  g.addColorStop(0, '#0d9488');
+  g.addColorStop(1, '#0f766e');
+  return g;
+}
+
+function rr(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.roundRect(x, y, w, h, r);
+}
+
+const VARIANTS = [
+  {
+    id: 'icon-512', label: 'App Icon — 512×512 (Auth0, favicon)', preview: 'dark',
+    filename: 'medicheck-icon-512.png', w: 512, h: 512,
+    draw(ctx, W, H) {
+      const R = W * 0.18, pad = W * 0.16;
+      ctx.fillStyle = tealGrad(ctx, 0, 0, W, H);
+      rr(ctx, 0, 0, W, H, R); ctx.fill();
+      drawMark(ctx, pad, pad, W - pad*2);
+    },
+  },
+  {
+    id: 'icon-192', label: 'App Icon — 192×192 (PWA)', preview: 'dark',
+    filename: 'medicheck-icon-192.png', w: 192, h: 192,
+    draw(ctx, W, H) {
+      ctx.fillStyle = tealGrad(ctx, 0, 0, W, H);
+      rr(ctx, 0, 0, W, H, W*0.18); ctx.fill();
+      const pad = W*0.16;
+      drawMark(ctx, pad, pad, W - pad*2);
+    },
+  },
+  {
+    id: 'logo-dark', label: 'Horizontal — dark bg (presentations)', preview: 'dark',
+    filename: 'medicheck-logo-dark.png', w: 800, h: 200,
+    draw(ctx, W, H) {
+      const iconSize = H*0.6, iconX = H*0.2, iconY = (H-iconSize)/2;
+      ctx.fillStyle = tealGrad(ctx, iconX, iconY, iconSize, iconSize);
+      rr(ctx, iconX, iconY, iconSize, iconSize, iconSize*0.18); ctx.fill();
+      const pad = iconSize*0.16;
+      drawMark(ctx, iconX+pad, iconY+pad, iconSize - pad*2);
+      ctx.fillStyle = '#f8fafc';
+      ctx.font = `800 ${H*0.4}px Inter, system-ui, sans-serif`;
+      ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+      ctx.fillText('MediCheck', iconX + iconSize + H*0.18, H/2);
+    },
+  },
+  {
+    id: 'logo-light', label: 'Horizontal — light bg (documents)', preview: 'light',
+    filename: 'medicheck-logo-light.png', w: 800, h: 200,
+    draw(ctx, W, H) {
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,W,H);
+      const iconSize = H*0.6, iconX = H*0.2, iconY = (H-iconSize)/2;
+      ctx.fillStyle = tealGrad(ctx, iconX, iconY, iconSize, iconSize);
+      rr(ctx, iconX, iconY, iconSize, iconSize, iconSize*0.18); ctx.fill();
+      drawMark(ctx, iconX + iconSize*0.16, iconY + iconSize*0.16, iconSize*0.68);
+      ctx.fillStyle = '#0f172a';
+      ctx.font = `800 ${H*0.4}px Inter, system-ui, sans-serif`;
+      ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+      ctx.fillText('MediCheck', iconX + iconSize + H*0.18, H/2);
+    },
+  },
+  {
+    id: 'logo-teal', label: 'Horizontal — teal bg (Auth0 banner)', preview: 'teal',
+    filename: 'medicheck-logo-teal.png', w: 800, h: 200,
+    draw(ctx, W, H) {
+      ctx.fillStyle = tealGrad(ctx, 0, 0, W, H); ctx.fillRect(0,0,W,H);
+      const iconSize = H*0.6, iconX = H*0.2, iconY = (H-iconSize)/2;
+      ctx.fillStyle = 'rgba(255,255,255,0.18)';
+      rr(ctx, iconX, iconY, iconSize, iconSize, iconSize*0.18); ctx.fill();
+      drawMark(ctx, iconX + iconSize*0.16, iconY + iconSize*0.16, iconSize*0.68);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `800 ${H*0.4}px Inter, system-ui, sans-serif`;
+      ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+      ctx.fillText('MediCheck', iconX + iconSize + H*0.18, H/2);
+    },
+  },
+  {
+    id: 'icon-transparent', label: 'Icon — transparent bg', preview: 'dark',
+    filename: 'medicheck-icon-transparent.png', w: 512, h: 512,
+    draw(ctx, W, H) {
+      const pad = W*0.06;
+      ctx.fillStyle = tealGrad(ctx, 0, 0, W, H);
+      rr(ctx, pad, pad, W-pad*2, H-pad*2, (W-pad*2)*0.18); ctx.fill();
+      drawMark(ctx, W*0.2, H*0.2, W*0.6);
+    },
+  },
+];
+
+const grid = document.getElementById('grid');
+VARIANTS.forEach(v => {
+  const scale = 2;
+  const canvas = document.createElement('canvas');
+  canvas.id = v.id;
+  canvas.width  = v.w * scale;
+  canvas.height = v.h * scale;
+  canvas.style.width  = Math.min(v.w, 280) + 'px';
+  canvas.style.height = Math.round(Math.min(v.w, 280) * (v.h / v.w)) + 'px';
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(scale, scale);
+  v.draw(ctx, v.w, v.h);
+
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `
+    <div class="card-label">${v.label}</div>
+    <div class="card-preview ${v.preview}" id="p-${v.id}"></div>
+    <div class="actions">
+      <button class="primary" onclick="dl('${v.id}','${v.filename}')">⬇ Download PNG</button>
+      <span class="size-label">${v.w}×${v.h}px</span>
+    </div>`;
+  card.querySelector(`#p-${v.id}`).appendChild(canvas);
+  grid.appendChild(card);
+});
+
+function dl(id, filename) {
+  const a = document.createElement('a');
+  a.href = document.getElementById(id).toDataURL('image/png');
+  a.download = filename; a.click();
+}
+</script>
+</body>
+</html>
