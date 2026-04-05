@@ -56,11 +56,11 @@ export const HEALTH_SERVICES: HealthService[] = [
  * Stored in user metadata: app_metadata.token_vault.{ serviceId: token }
  */
 const DEMO_TOKENS: Record<ServiceId, string> = {
-  ehr: process.env.DEMO_EHR_TOKEN ?? 'demo_ehr_tok_abc123',
-  insurance: process.env.DEMO_INSURANCE_TOKEN ?? 'demo_insurance_tok_def456',
-  calendar: process.env.DEMO_CALENDAR_TOKEN ?? 'demo_calendar_tok_ghi789',
-  pharmacy: process.env.DEMO_PHARMACY_TOKEN ?? 'demo_pharmacy_tok_jkl012',
-  email: process.env.DEMO_EMAIL_TOKEN ?? 'demo_email_tok_mno345',
+  ehr: process.env.DEMO_EHR_TOKEN ?? 'demo_ehr_token_abc123',
+  insurance: process.env.DEMO_INSURANCE_TOKEN ?? 'demo_insurance_token_def456',
+  calendar: process.env.DEMO_CALENDAR_TOKEN ?? 'demo_calendar_token_jkl012',
+  pharmacy: process.env.DEMO_PHARMACY_TOKEN ?? 'demo_pharmacy_token_ghi789',
+  email: process.env.DEMO_EMAIL_TOKEN ?? 'demo_email_token_mno345',
 };
 
 async function getMgmtApiToken(): Promise<string> {

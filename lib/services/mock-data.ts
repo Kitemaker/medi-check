@@ -2,11 +2,11 @@ import patientData from '@/data/demo-patient.json';
 import type { InsuranceCoverage, Appointment, Medication } from '@/types';
 
 const DEMO_TOKENS = new Set([
-  process.env.DEMO_EHR_TOKEN ?? 'demo_ehr_tok_abc123',
-  process.env.DEMO_INSURANCE_TOKEN ?? 'demo_insurance_tok_def456',
-  process.env.DEMO_CALENDAR_TOKEN ?? 'demo_calendar_tok_ghi789',
-  process.env.DEMO_PHARMACY_TOKEN ?? 'demo_pharmacy_tok_jkl012',
-  process.env.DEMO_EMAIL_TOKEN ?? 'demo_email_tok_mno345',
+  process.env.DEMO_EHR_TOKEN ?? 'demo_ehr_token_abc123',
+  process.env.DEMO_INSURANCE_TOKEN ?? 'demo_insurance_token_def456',
+  process.env.DEMO_CALENDAR_TOKEN ?? 'demo_calendar_token_jkl012',
+  process.env.DEMO_PHARMACY_TOKEN ?? 'demo_pharmacy_token_ghi789',
+  process.env.DEMO_EMAIL_TOKEN ?? 'demo_email_token_mno345',
 ]);
 
 export function validateToken(token: string | undefined | null): boolean {
