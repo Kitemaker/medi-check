@@ -3,9 +3,15 @@ import { z } from 'zod';
 import { getServiceToken } from './token-vault';
 import { lookupDrug } from './services/open-fda';
 import { sendAppointmentConfirmation } from './services/resend';
+import {
+  validateToken,
+  getEhrData,
+  getInsuranceCoverage,
+  getAvailableSlots,
+  bookAppointment as mockBookAppointment,
+  getPharmacyData,
+} from './services/mock-data';
 import type { ServiceId } from '@/types';
-
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
 
 function notAuthorized(service: string, serviceId: ServiceId) {
   return {
@@ -17,21 +23,6 @@ function notAuthorized(service: string, serviceId: ServiceId) {
   };
 }
 
-async function fetchMockService(
-  path: string,
-  token: string,
-  options: RequestInit = {}
-): Promise<Response> {
-  return fetch(`${BASE_URL}${path}`, {
-    ...options,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-      ...(options.headers ?? {}),
-    },
-  });
-}
-
 export function createAgentTools(userId: string, userEmail?: string, userName?: string) {
   return {
     getPatientHistory: tool({
@@ -39,18 +30,10 @@ export function createAgentTools(userId: string, userEmail?: string, userName?: 
         "Retrieve the patient's medical history, recent visits, conditions, allergies, and primary care information from their Electronic Health Record (EHR).",
       inputSchema: z.object({}),
       execute: async () => {
-        let token: string | null;
-        try {
-          token = await getServiceToken(userId, 'ehr');
-        } catch (err) {
-          console.error('[getPatientHistory] getServiceToken failed:', err);
-          return { error: 'TOKEN_FETCH_ERROR', message: String(err) };
-        }
+        const token = await getServiceToken(userId, 'ehr');
         if (!token) return notAuthorized('EHR Records', 'ehr');
-
-        const res = await fetchMockService('/api/mock/ehr', token);
-        if (!res.ok) return notAuthorized('EHR Records', 'ehr');
-        return res.json();
+        if (!validateToken(token)) return notAuthorized('EHR Records', 'ehr');
+        return getEhrData();
       },
     }),
 
@@ -68,14 +51,9 @@ export function createAgentTools(userId: string, userEmail?: string, userName?: 
         const { procedureType, specialistType } = input;
         const token = await getServiceToken(userId, 'insurance');
         if (!token) return notAuthorized('Insurance', 'insurance');
+        if (!validateToken(token)) return notAuthorized('Insurance', 'insurance');
 
-        const params = new URLSearchParams({ procedure: procedureType });
-        if (specialistType) params.set('specialist', specialistType);
-
-        const res = await fetchMockService(`/api/mock/insurance?${params}`, token);
-        if (!res.ok) return notAuthorized('Insurance', 'insurance');
-
-        const coverage = await res.json();
+        const coverage = getInsuranceCoverage(procedureType, specialistType);
         return { ...coverage, insurancePlan: 'BlueCross PPO Gold', memberId: 'BCX-2024-88471' };
       },
     }),
@@ -93,11 +71,8 @@ export function createAgentTools(userId: string, userEmail?: string, userName?: 
         const { specialty } = input;
         const token = await getServiceToken(userId, 'calendar');
         if (!token) return notAuthorized('Appointments Calendar', 'calendar');
-
-        const params = specialty ? `?specialty=${encodeURIComponent(specialty)}` : '';
-        const res = await fetchMockService(`/api/mock/appointments${params}`, token);
-        if (!res.ok) return notAuthorized('Appointments Calendar', 'calendar');
-        return res.json();
+        if (!validateToken(token)) return notAuthorized('Appointments Calendar', 'calendar');
+        return getAvailableSlots(specialty);
       },
     }),
 
@@ -117,14 +92,9 @@ export function createAgentTools(userId: string, userEmail?: string, userName?: 
         const { slotIndex, reason, sendConfirmationEmail } = input;
         const token = await getServiceToken(userId, 'calendar');
         if (!token) return notAuthorized('Appointments Calendar', 'calendar');
+        if (!validateToken(token)) return notAuthorized('Appointments Calendar', 'calendar');
 
-        const res = await fetchMockService('/api/mock/appointments', token, {
-          method: 'POST',
-          body: JSON.stringify({ slotIndex, reason }),
-        });
-
-        if (!res.ok) return notAuthorized('Appointments Calendar', 'calendar');
-        const { appointment } = await res.json();
+        const appointment = mockBookAppointment(slotIndex, reason);
 
         let emailResult = null;
         if (sendConfirmationEmail) {
@@ -152,10 +122,8 @@ export function createAgentTools(userId: string, userEmail?: string, userName?: 
       execute: async () => {
         const token = await getServiceToken(userId, 'pharmacy');
         if (!token) return notAuthorized('Pharmacy', 'pharmacy');
-
-        const res = await fetchMockService('/api/mock/pharmacy', token);
-        if (!res.ok) return notAuthorized('Pharmacy', 'pharmacy');
-        return res.json();
+        if (!validateToken(token)) return notAuthorized('Pharmacy', 'pharmacy');
+        return getPharmacyData();
       },
     }),
 
