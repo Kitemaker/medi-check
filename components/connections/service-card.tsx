@@ -76,52 +76,60 @@ export function ServiceCard({ service, onConnect, onRevoke }: ServiceCardProps) 
           : 'border-gray-200 bg-white hover:border-gray-300'
       }`}
     >
-      {/* Service info row */}
-      <div className="flex items-start gap-3 p-4">
-        <div
-          className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg ${
-            service.connected ? 'bg-teal-100 text-teal-700' : 'bg-gray-100 text-gray-500'
-          }`}
-        >
-          <ServiceIcon serviceId={service.id} className="h-5 w-5" />
+      {/* Service info */}
+      <div className="p-3">
+        {/* Line 1: Icon + Name */}
+        <div className="flex items-center gap-2">
+          <div
+            className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg ${
+              service.connected ? 'bg-teal-100 text-teal-700' : 'bg-gray-100 text-gray-500'
+            }`}
+          >
+            <ServiceIcon serviceId={service.id} className="h-4 w-4" />
+          </div>
+          <span className="font-medium text-gray-900 text-sm">{service.name}</span>
         </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex min-w-0 items-center gap-2">
-              <span className="truncate font-medium text-gray-900">{service.name}</span>
-              {service.connected && (
-                <span className="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-teal-100 px-2 py-0.5 text-xs font-medium text-teal-700">
-                  <span className="h-1.5 w-1.5 rounded-full bg-teal-500" />
-                  Connected
+
+        {/* Line 2: Description */}
+        <p className="mt-1.5 text-xs text-gray-500 leading-relaxed">{service.description}</p>
+
+        {/* Line 3: Connected status + timestamp OR Connect button */}
+        <div className="mt-1.5">
+          {service.connected ? (
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1 rounded-full bg-teal-100 px-2 py-0.5 text-xs font-medium text-teal-700">
+                <span className="h-1.5 w-1.5 rounded-full bg-teal-500" />
+                Connected
+              </span>
+              {service.connectedAt && (
+                <span className="text-[11px] text-gray-400">
+                  {new Date(service.connectedAt).toLocaleDateString()}
                 </span>
               )}
             </div>
-            {!service.connected && (
-              <button
-                onClick={handleConnectClick}
-                disabled={loading || showConsent}
-                className="flex-shrink-0 rounded-lg bg-teal-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-teal-700 disabled:opacity-50"
-              >
-                Connect
-              </button>
-            )}
-          </div>
-          <p className="mt-0.5 line-clamp-2 text-xs text-gray-500">{service.description}</p>
-          {service.connected && service.connectedAt && (
-            <p className="mt-0.5 text-xs text-gray-400">
-              Since {new Date(service.connectedAt).toLocaleDateString()}
-            </p>
-          )}
-          {service.connected && (
+          ) : (
             <button
-              onClick={handleRevoke}
-              disabled={loading}
-              className="mt-2 rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-50"
+              onClick={handleConnectClick}
+              disabled={loading || showConsent}
+              className="rounded-lg bg-teal-600 px-3 py-1 text-xs font-medium text-white transition hover:bg-teal-700 disabled:opacity-50"
             >
-              {loading ? 'Revoking...' : 'Revoke'}
+              Connect
             </button>
           )}
         </div>
+
+        {/* Line 4: Revoke button (connected only) */}
+        {service.connected && (
+          <div className="mt-1.5">
+            <button
+              onClick={handleRevoke}
+              disabled={loading}
+              className="rounded-lg border border-red-200 bg-white px-3 py-1 text-xs font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-50"
+            >
+              {loading ? 'Revoking...' : 'Revoke'}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Inline OAuth consent panel */}
