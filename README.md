@@ -36,7 +36,7 @@ Built on **Auth0 Token Vault** (Auth0 for AI Agents), each connected health serv
 ## Project Structure
 
 ```
-medi-agent/
+medi-check/
 ├── app/
 │   ├── page.tsx                      # Landing page
 │   ├── api/
@@ -93,7 +93,7 @@ AUTH0_DOMAIN=your-tenant.auth0.com
 AUTH0_CLIENT_ID=
 AUTH0_CLIENT_SECRET=
 AUTH0_SECRET=                    # openssl rand -hex 32
-APP_BASE_URL=http://localhost:3000
+AUTH0_BASE_URL=http://localhost:3000
 
 # Auth0 M2M — for Token Vault (Management API access)
 AUTH0_MGMT_CLIENT_ID=
@@ -181,16 +181,10 @@ flowchart TD
         ChatAPI["POST /api/chat\nAI streaming endpoint"]
         ConnAPI["GET/POST/DELETE /api/connections\nToken Vault API"]
 
-        subgraph MockServices ["Mock Health Service APIs"]
-            EHR["/api/mock/ehr"]
-            INS["/api/mock/insurance"]
-            CAL["/api/mock/appointments"]
-            PHA["/api/mock/pharmacy"]
-        end
-
         subgraph AgentLayer ["AI Agent Layer (lib/)"]
             Tools["agent-tools.ts\ngetPatientHistory · checkInsuranceCoverage\nbookAppointment · getCurrentMedications\nsendHealthReminder · lookupMedication"]
             TokenVault["token-vault.ts\ngetServiceToken · connectService · revokeService"]
+            MockData["mock-data.ts\ngetEhrData · getInsuranceCoverage\ngetAvailableSlots · bookAppointment\ngetPharmacyData · validateToken"]
         end
     end
 
@@ -223,8 +217,9 @@ flowchart TD
     TokenVault -->|"GET /api/v2/users/:id"| MgmtAPI
     MgmtAPI --- AppMeta
 
-    %% Authorized path
-    TokenVault -->|"token present → Bearer token"| MockServices
+    %% Authorized path — direct function calls, no HTTP
+    TokenVault -->|"token present"| Tools
+    Tools -->|"validateToken + direct call"| MockData
     Tools -->|"lookupMedication"| OpenFDA
     Tools -->|"sendHealthReminder"| Resend
 

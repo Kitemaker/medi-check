@@ -450,7 +450,7 @@
           <div class="step"><div class="step-num">01</div><div class="step-body"><h4>Patient sends a message</h4><p>Chat request streams via Next.js API route using Vercel AI SDK v6.</p></div></div>
           <div class="step"><div class="step-num">02</div><div class="step-body"><h4>GPT-4o selects tools</h4><p>LLM reasons over 7 agent tools and decides which health services to call.</p></div></div>
           <div class="step"><div class="step-num">03</div><div class="step-body"><h4>Token Vault check</h4><p>Each tool fetches its token from Auth0 app_metadata at runtime. No token → graceful NOT_AUTHORIZED error.</p></div></div>
-          <div class="step"><div class="step-num">04</div><div class="step-body"><h4>Service call</h4><p>Bearer token sent to health service. Structured result streamed back to patient.</p></div></div>
+          <div class="step"><div class="step-num">04</div><div class="step-body"><h4>Service call</h4><p>Token validated, mock-data function called directly — no HTTP self-call. Result streamed back to patient.</p></div></div>
           <div class="step"><div class="step-num">05</div><div class="step-body"><h4>Audit logged</h4><p>Every token usage appears live in the sidebar audit log — full transparency.</p></div></div>
         </div>
       </div>
@@ -459,19 +459,20 @@
       <div style="flex:1.1;display:flex;align-items:center">
         <div class="code-block" style="width:100%">
           <div><span class="cm">// agent-tools.ts — getAvailableAppointments</span></div>
-          <div style="margin-top:10px"><span class="fn">execute</span>: <span class="kw">async</span> () =&gt; {</div>
+          <div style="margin-top:10px"><span class="fn">execute</span>: <span class="kw">async</span> ({ specialty }) =&gt; {</div>
           <span class="ind"><span class="cm">// 1. Fetch token from Auth0 Token Vault</span></span>
           <span class="ind"><span class="kw">const</span> token = <span class="kw">await</span> <span class="fn">getServiceToken</span>(</span>
           <span class="ind2">userId, <span class="str">'calendar'</span></span>
           <span class="ind">);</span>
           <div style="margin-top:6px"></div>
-          <span class="ind"><span class="cm">// 2. Guard — graceful, never a crash</span></span>
+          <span class="ind"><span class="cm">// 2. Guard — token absent</span></span>
           <span class="ind"><span class="kw">if</span> (!token) <span class="kw">return</span> <span class="fn">notAuthorized</span>(</span>
-          <span class="ind2"><span class="str">'Calendar'</span>, <span class="str">'calendar'</span></span>
+          <span class="ind2"><span class="str">'Appointments Calendar'</span>, <span class="str">'calendar'</span></span>
           <span class="ind">);</span>
           <div style="margin-top:6px"></div>
-          <span class="ind"><span class="cm">// 3. Call service with bearer token</span></span>
-          <span class="ind"><span class="kw">return</span> <span class="fn">getSlots</span>(token);</span>
+          <span class="ind"><span class="cm">// 3. Validate token, call directly — no HTTP</span></span>
+          <span class="ind"><span class="kw">if</span> (!<span class="fn">validateToken</span>(token)) <span class="kw">return</span> <span class="fn">notAuthorized</span>(...);</span>
+          <span class="ind"><span class="kw">return</span> <span class="fn">getAvailableSlots</span>(specialty);</span>
           <div>};</div>
           <div style="margin-top:14px"><span class="cm">// token-vault.ts — reads Auth0 app_metadata</span></div>
           <div style="margin-top:8px"><span class="kw">export async function</span> <span class="fn">getServiceToken</span>(</div>
