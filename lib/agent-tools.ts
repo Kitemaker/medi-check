@@ -39,7 +39,13 @@ export function createAgentTools(userId: string, userEmail?: string, userName?: 
         "Retrieve the patient's medical history, recent visits, conditions, allergies, and primary care information from their Electronic Health Record (EHR).",
       inputSchema: z.object({}),
       execute: async () => {
-        const token = await getServiceToken(userId, 'ehr');
+        let token: string | null;
+        try {
+          token = await getServiceToken(userId, 'ehr');
+        } catch (err) {
+          console.error('[getPatientHistory] getServiceToken failed:', err);
+          return { error: 'TOKEN_FETCH_ERROR', message: String(err) };
+        }
         if (!token) return notAuthorized('EHR Records', 'ehr');
 
         const res = await fetchMockService('/api/mock/ehr', token);
