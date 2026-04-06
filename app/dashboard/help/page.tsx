@@ -1,7 +1,16 @@
+import Link from 'next/link';
+
 export default function HelpPage() {
   return (
     <div className="min-h-full overflow-y-auto bg-gray-50 p-6">
       <div className="mx-auto max-w-3xl space-y-8">
+
+        {/* Back link */}
+        <div>
+          <Link href="/dashboard" className="text-sm text-teal-600 hover:underline">
+            ← Back to Dashboard
+          </Link>
+        </div>
 
         {/* Header */}
         <div>
