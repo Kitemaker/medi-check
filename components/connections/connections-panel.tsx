@@ -98,19 +98,19 @@ export function ConnectionsPanel({ auditLog }: ConnectionsPanelProps) {
                   entry.success ? 'bg-gray-50' : 'bg-red-50'
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-gray-700">{entry.action}</span>
-                  <span
-                    className={`text-xs ${entry.success ? 'text-green-600' : 'text-red-500'}`}
-                  >
-                    {entry.success ? '✓' : '✗'}
-                  </span>
-                </div>
-                <div className="mt-0.5 flex items-center gap-2">
-                  <span className="font-mono text-xs text-gray-400">{entry.tokenPreview}</span>
-                  <span className="text-xs text-gray-400">
-                    {new Date(entry.timestamp).toLocaleTimeString()}
-                  </span>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-gray-800 truncate">{entry.action}</p>
+                    <p className="text-[11px] text-gray-400 mt-0.5">{entry.tokenPreview}</p>
+                  </div>
+                  <div className="flex flex-col items-end gap-0.5 flex-shrink-0">
+                    <span className={`text-xs font-semibold ${entry.success ? 'text-green-600' : 'text-red-500'}`}>
+                      {entry.success ? '✓ OK' : '✗ Denied'}
+                    </span>
+                    <span className="text-[10px] text-gray-400">
+                      {new Date(entry.timestamp).toLocaleTimeString()}
+                    </span>
+                  </div>
                 </div>
               </div>
             ))}

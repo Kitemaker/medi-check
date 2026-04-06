@@ -6,24 +6,14 @@ import { ConnectionsPanel } from '@/components/connections/connections-panel';
 import { MediCheckLogo } from '@/components/ui/logo';
 import type { AuditLogEntry } from '@/types';
 
-const SERVICE_NAMES: Record<string, string> = {
-  getPatientHistory: 'EHR Records',
-  checkInsuranceCoverage: 'Insurance',
-  getAvailableAppointments: 'Calendar',
-  bookAppointment: 'Calendar',
-  getCurrentMedications: 'Pharmacy',
-  lookupMedication: 'FDA Database',
-  sendHealthReminder: 'Email',
-};
-
-const SERVICE_TOKENS: Record<string, string> = {
-  getPatientHistory: 'demo_ehr****abc123',
-  checkInsuranceCoverage: 'demo_ins****def456',
-  getAvailableAppointments: 'demo_cal****ghi789',
-  bookAppointment: 'demo_cal****ghi789',
-  getCurrentMedications: 'demo_pha****jkl012',
-  lookupMedication: 'public_api',
-  sendHealthReminder: 'demo_eml****mno345',
+const TOOL_LABELS: Record<string, { icon: string; service: string; action: string }> = {
+  getPatientHistory:       { icon: '🏥', service: 'EHR Records',   action: 'Fetched medical history' },
+  checkInsuranceCoverage:  { icon: '🛡️', service: 'Insurance',     action: 'Checked insurance coverage' },
+  getAvailableAppointments:{ icon: '📅', service: 'Calendar',       action: 'Fetched available appointments' },
+  bookAppointment:         { icon: '📅', service: 'Calendar',       action: 'Booked appointment' },
+  getCurrentMedications:   { icon: '💊', service: 'Pharmacy',       action: 'Fetched medications' },
+  lookupMedication:        { icon: '🔬', service: 'FDA Database',   action: 'Looked up medication' },
+  sendHealthReminder:      { icon: '📧', service: 'Email',          action: 'Sent health reminder' },
 };
 
 interface User {
@@ -38,14 +28,15 @@ export function DashboardClient({ user }: { user: User }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const handleToolCall = useCallback((toolName: string, success: boolean) => {
+    const label = TOOL_LABELS[toolName];
     setAuditLog((prev) => [
       ...prev,
       {
         id: `${Date.now()}-${Math.random()}`,
         timestamp: new Date().toISOString(),
         service: toolName as AuditLogEntry['service'],
-        action: SERVICE_NAMES[toolName] ?? toolName,
-        tokenPreview: SERVICE_TOKENS[toolName] ?? 'unknown',
+        action: label?.action ?? toolName,
+        tokenPreview: label ? `${label.icon} ${label.service}` : toolName,
         success,
       },
     ]);
