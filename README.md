@@ -1,6 +1,6 @@
 # MediCheck — AI Healthcare Navigator
 
-> Built for the [Auth0 "Authorized to Act" Hackathon](https://authorizedtoact.devpost.com/) · $10K prize pool · Deadline April 6, 2026
+> Built for the [Auth0 "Authorized to Act" Hackathon](https://authorizedtoact.devpost.com/) 
 
 MediCheck is an AI-powered healthcare navigation assistant that acts on behalf of patients — booking appointments, checking insurance coverage, reviewing medical records, and managing medications — while keeping the patient in complete control of what it can access.
 
@@ -272,18 +272,6 @@ sequenceDiagram
 
 ---
 
-## Judging Criteria
-
-| Criterion | Implementation |
-|---|---|
-| Security model | Per-service Token Vault isolation, instant revocation, masked token display in audit log |
-| User control | Connect/disconnect any service independently, clear unauthorized messaging |
-| Technical execution | Next.js 16 + Vercel AI SDK v6 + Auth0 v4, TypeScript strict mode |
-| UX/Design | Clean dashboard, inline tool transparency, real-time audit log |
-| Community impact | Healthcare navigation for underserved patients |
-| Novel authorization insights | Patient-controlled AI agent with granular health service permissions |
-
----
 
 ## Deployment
 
