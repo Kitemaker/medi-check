@@ -18,18 +18,30 @@ export default function HelpPage() {
           {[
             {
               num: '01',
+              title: 'Create an account or log in',
+              body: 'Click "Get started" on the home page. You will be redirected to Auth0\'s Universal Login — sign up with your email or log in with an existing account. Auth0 handles all authentication securely.',
+              tip: null,
+            },
+            {
+              num: '02',
+              title: 'Land on your dashboard',
+              body: 'After logging in you are taken straight to your personal dashboard. Your session is secured by Auth0 — no passwords are stored in MediCheck.',
+              tip: null,
+            },
+            {
+              num: '03',
               title: 'Connect your health services',
               body: 'Open the left sidebar and click Connect next to each service you want MediCheck to access. Each service gets its own secure token stored in Auth0 Token Vault — the agent can only use services you have explicitly authorised.',
               tip: 'You can revoke any service at any time. MediCheck immediately loses access.',
             },
             {
-              num: '02',
+              num: '04',
               title: 'Ask in plain English',
               body: 'Type your question or request in the chat box at the bottom. MediCheck understands natural language — no special commands needed.',
               tip: null,
             },
             {
-              num: '03',
+              num: '05',
               title: 'Review what the agent does',
               body: 'Every tool call MediCheck makes is recorded in the Audit Log at the bottom of the sidebar. You can see which service was accessed, which token was used, and whether it succeeded.',
               tip: null,
@@ -50,6 +62,26 @@ export default function HelpPage() {
           ))}
         </section>
 
+        {/* Example prompts */}
+        <section className="space-y-3">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400">Example questions to ask</h2>
+          <div className="rounded-xl bg-white shadow-sm ring-1 ring-gray-100 divide-y divide-gray-100">
+            {[
+              { prompt: 'I have knee pain — can I see a specialist?', note: 'Checks EHR → verifies insurance coverage → finds appointments' },
+              { prompt: 'What medications am I currently taking?', note: 'Reads your pharmacy record' },
+              { prompt: 'Is physical therapy covered by my insurance?', note: 'Checks your plan coverage and copay' },
+              { prompt: 'Book me an appointment with an orthopedic specialist', note: 'Finds available slots and books — sends email confirmation' },
+              { prompt: 'Show me my recent medical history', note: 'Reads your EHR records' },
+              { prompt: 'Send me a reminder about my Metformin', note: 'Sends an email reminder via the Email service' },
+            ].map((item) => (
+              <div key={item.prompt} className="px-5 py-3.5">
+                <p className="text-sm font-medium text-gray-800">&ldquo;{item.prompt}&rdquo;</p>
+                <p className="mt-0.5 text-xs text-gray-400">{item.note}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* Services */}
         <section className="space-y-3">
           <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400">Available services</h2>
@@ -67,26 +99,6 @@ export default function HelpPage() {
                   <p className="text-sm font-semibold text-gray-900">{s.name}</p>
                   <p className="mt-0.5 text-xs text-gray-500">{s.desc}</p>
                 </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Example prompts */}
-        <section className="space-y-3">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400">Example questions to ask</h2>
-          <div className="rounded-xl bg-white shadow-sm ring-1 ring-gray-100 divide-y divide-gray-100">
-            {[
-              { prompt: 'I have knee pain — can I see a specialist?', note: 'Checks EHR → verifies insurance coverage → finds appointments' },
-              { prompt: 'What medications am I currently taking?', note: 'Reads your pharmacy record' },
-              { prompt: 'Is physical therapy covered by my insurance?', note: 'Checks your plan coverage and copay' },
-              { prompt: 'Book me an appointment with an orthopedic specialist', note: 'Finds available slots and books — sends email confirmation' },
-              { prompt: 'Show me my recent medical history', note: 'Reads your EHR records' },
-              { prompt: 'Send me a reminder about my Metformin', note: 'Sends an email reminder via the Email service' },
-            ].map((item) => (
-              <div key={item.prompt} className="px-5 py-3.5">
-                <p className="text-sm font-medium text-gray-800">&ldquo;{item.prompt}&rdquo;</p>
-                <p className="mt-0.5 text-xs text-gray-400">{item.note}</p>
               </div>
             ))}
           </div>

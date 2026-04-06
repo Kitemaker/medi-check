@@ -78,7 +78,7 @@ export function ServiceCard({ service, onConnect, onRevoke }: ServiceCardProps) 
     >
       {/* Service info row */}
       <div className="flex items-start justify-between gap-3 p-4">
-        <div className="flex items-start gap-3">
+        <div className="flex min-w-0 items-start gap-3">
           <div
             className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg ${
               service.connected ? 'bg-teal-100 text-teal-700' : 'bg-gray-100 text-gray-500'
@@ -97,12 +97,7 @@ export function ServiceCard({ service, onConnect, onRevoke }: ServiceCardProps) 
               )}
             </div>
             <p className="mt-0.5 text-xs text-gray-500">{service.description}</p>
-            {service.connected && service.tokenPreview && (
-              <p className="mt-1 font-mono text-xs text-gray-400">
-                Token: {service.tokenPreview}
-              </p>
-            )}
-            {service.connected && service.connectedAt && (
+{service.connected && service.connectedAt && (
               <p className="mt-0.5 text-xs text-gray-400">
                 Since {new Date(service.connectedAt).toLocaleDateString()}
               </p>
