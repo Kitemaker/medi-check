@@ -13,7 +13,7 @@ Built on **Auth0 Token Vault** (Auth0 for AI Agents), each connected health serv
 1. **Login** with Auth0 — your identity is verified before anything else
 2. **Connect services** — choose which health services the agent can access (EHR, insurance, calendar, pharmacy, email). Each gets its own secure token stored in Auth0 Token Vault
 3. **Ask in plain English** — "I have knee pain, can I see a specialist?" — the agent handles the rest
-4. **Stay in control** — every agent action is logged in the audit trail. Revoke any service connection instantly
+4. **Stay in control** — every agent action is recorded in the **Activity Log** (top nav bar). Revoke any service connection instantly
 
 ---
 

@@ -451,7 +451,7 @@
           <div class="step"><div class="step-num">02</div><div class="step-body"><h4>GPT-4o selects tools</h4><p>LLM reasons over 7 agent tools and decides which health services to call.</p></div></div>
           <div class="step"><div class="step-num">03</div><div class="step-body"><h4>Token Vault check</h4><p>Each tool fetches its token from Auth0 app_metadata at runtime. No token → graceful NOT_AUTHORIZED error.</p></div></div>
           <div class="step"><div class="step-num">04</div><div class="step-body"><h4>Service call</h4><p>Token validated, mock-data function called directly — no HTTP self-call. Result streamed back to patient.</p></div></div>
-          <div class="step"><div class="step-num">05</div><div class="step-body"><h4>Audit logged</h4><p>Every token usage appears live in the sidebar audit log — full transparency.</p></div></div>
+          <div class="step"><div class="step-num">05</div><div class="step-body"><h4>Activity logged</h4><p>Every token usage is recorded in the Activity Log — accessible via the top nav bar. Shows action, service, status, and timestamp.</p></div></div>
         </div>
       </div>
 
@@ -638,7 +638,7 @@
             <th>Credentials in app</th>
             <th>Per-service isolation</th>
             <th>Instant revocation</th>
-            <th>Audit trail</th>
+            <th>Activity Log</th>
             <th>User controls access</th>
           </tr>
         </thead>
@@ -758,7 +758,7 @@
       </h2>
 
       <p class="subtitle" style="text-align:center;margin:16px auto 0;max-width:500px">
-        Every service token isolated. Every action audited.<br/>Complete user control — connect, revoke, repeat.
+        Every service token isolated. Every action logged in the Activity Log.<br/>Complete user control — connect, revoke, repeat.
       </p>
 
       <div style="display:flex;gap:10px;margin-top:32px;flex-wrap:wrap;justify-content:center">

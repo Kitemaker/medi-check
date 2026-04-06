@@ -52,7 +52,7 @@ export default function HelpPage() {
             {
               num: '05',
               title: 'Review what the agent does',
-              body: 'Every tool call MediCheck makes is recorded in the Audit Log at the bottom of the sidebar. You can see which service was accessed, which token was used, and whether it succeeded.',
+              body: 'Every tool call MediCheck makes is recorded in the Activity Log — click "Activity Log" in the top navigation bar to open it. You can see which service was accessed, what action was taken, and whether it succeeded.',
               tip: null,
             },
           ].map((step) => (
@@ -215,7 +215,7 @@ export default function HelpPage() {
             <li>• Service tokens are stored in <strong>Auth0 Token Vault</strong> — never in the app or the browser.</li>
             <li>• The agent fetches a token only at the moment it needs to call a service.</li>
             <li>• Revoking a service removes its token instantly — the agent cannot access it again until you reconnect.</li>
-            <li>• Every action is logged in the Audit Log so you always know what was accessed.</li>
+            <li>• Every action is recorded in the <strong>Activity Log</strong> (top nav bar) so you always know what was accessed and when.</li>
           </ul>
         </section>
 
