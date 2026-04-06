@@ -42,20 +42,19 @@ export function ChatInterface({ onToolCall, userName }: ChatInterfaceProps) {
   }, []);
 
   // Track tool call completions for audit log
-  const prevMessagesLen = useRef(0);
+  const reportedToolParts = useRef(new Set<string>());
   useEffect(() => {
-    if (messages.length !== prevMessagesLen.current) {
-      prevMessagesLen.current = messages.length;
-      const lastMsg = messages[messages.length - 1];
-      if (lastMsg?.role === 'assistant') {
-        for (const part of lastMsg.parts) {
-          if (isToolUIPart(part) && part.state === 'output-available') {
-            const toolName = part.type.replace(/^tool-/, '');
-            const output = (part as { output: unknown }).output;
-            const success = (output as Record<string, unknown>)?.error !== 'NOT_AUTHORIZED';
-            onToolCall?.(toolName, success);
-          }
-        }
+    for (const msg of messages) {
+      if (msg.role !== 'assistant') continue;
+      for (const part of msg.parts) {
+        if (!isToolUIPart(part) || part.state !== 'output-available') continue;
+        const key = `${msg.id}-${part.type}`;
+        if (reportedToolParts.current.has(key)) continue;
+        reportedToolParts.current.add(key);
+        const toolName = part.type.replace(/^tool-/, '');
+        const output = (part as { output: unknown }).output;
+        const success = (output as Record<string, unknown>)?.error !== 'NOT_AUTHORIZED';
+        onToolCall?.(toolName, success);
       }
     }
   }, [messages, onToolCall]);
