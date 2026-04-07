@@ -4,11 +4,19 @@ interface MedicationDetail {
   name: string;
   genericName?: string;
   purpose?: string;
-  warnings?: string[];
+  warnings?: string | string[];
   dosage?: string;
-  adverseReactions?: string[];
-  interactions?: string[];
+  dosageAndAdministration?: string;
+  adverseReactions?: string | string[];
+  interactions?: string | string[];
+  drugInteractions?: string | string[];
   source?: string;
+}
+
+function toArray(value?: string | string[]): string[] {
+  if (!value) return [];
+  if (Array.isArray(value)) return value;
+  return [value];
 }
 
 function Section({ title, items, color }: { title: string; items: string[]; color: 'red' | 'amber' | 'blue' | 'gray' }) {
@@ -36,9 +44,13 @@ function Section({ title, items, color }: { title: string; items: string[]; colo
 }
 
 export function MedicationDetailCard({ data }: { data: MedicationDetail }) {
-  const { name, genericName, purpose, warnings, dosage, adverseReactions, interactions, source } = data;
+  const { name, genericName, purpose, source } = data;
+  const dosage = data.dosage ?? data.dosageAndAdministration;
+  const warnings = toArray(data.warnings);
+  const adverseReactions = toArray(data.adverseReactions);
+  const interactions = toArray(data.interactions ?? data.drugInteractions);
 
-  const hasWarnings = warnings && warnings.length > 0;
+  const hasWarnings = warnings.length > 0;
 
   return (
     <div className="mt-2 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
@@ -57,7 +69,7 @@ export function MedicationDetailCard({ data }: { data: MedicationDetail }) {
           <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
             {hasWarnings && (
               <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-bold text-amber-700 border border-amber-200">
-                ⚠ {warnings!.length} Warning{warnings!.length !== 1 ? 's' : ''}
+                ⚠ {warnings.length} Warning{warnings.length !== 1 ? 's' : ''}
               </span>
             )}
             {source && (
@@ -80,9 +92,9 @@ export function MedicationDetailCard({ data }: { data: MedicationDetail }) {
           </div>
         )}
 
-        <Section title="⚠ Warnings & Contraindications" items={warnings ?? []} color="red" />
-        <Section title="Adverse Reactions" items={adverseReactions ?? []} color="amber" />
-        <Section title="Drug Interactions" items={interactions ?? []} color="blue" />
+        <Section title="⚠ Warnings & Contraindications" items={warnings} color="red" />
+        <Section title="Adverse Reactions" items={adverseReactions} color="amber" />
+        <Section title="Drug Interactions" items={interactions} color="blue" />
       </div>
 
       {/* Footer */}
